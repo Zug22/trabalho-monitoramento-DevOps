@@ -1,0 +1,29 @@
+groups:
+  - name: alertas_devops
+    rules:
+      - alert: Alerta_CPU_Amarelo
+        expr: percentual_uso_cpu >= 70
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Atenção: CPU acima de 70%"
+          description: "O servidor Linux atingiu {{ $value }}% de uso de CPU."
+
+      - alert: Alerta_CPU_Vermelho
+        expr: percentual_uso_cpu >= 90
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CRÍTICO: CPU acima de 90%"
+          description: "O servidor Linux está sobrecarregado com {{ $value }}% de uso de CPU."
+
+      - alert: Alta_Taxa_Erros_HTTP
+        expr: rate(total_erroshttp[1m]) > 0
+        for: 15s
+        labels:
+          severity: critical
+        annotations:
+          summary: "CRÍTICO: Falhas no Servidor Web"
+          description: "A API C++ está retornando erros 500. Taxa atual {{ $value }} erros/segundos."

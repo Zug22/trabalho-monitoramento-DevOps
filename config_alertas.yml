@@ -1,0 +1,10 @@
+route:
+  receiver: 'equipe_devops'
+
+receivers:
+  - name: 'equipe_devops'
+    email_configs:
+      - to: 'pietro1.com@gmail.com'
+        from: 'alertas@monitoriamento.local'
+        smarthost: 'mailhog:1025'
+        require_tls: false

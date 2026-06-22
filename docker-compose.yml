@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./condicoes_alerta.yml:/etc/prometheus/condicoes_alerta.yml
+    ports:
+      - "9090:9090"
+    extra_hosts:
+      - "host.docker.internal:host-gateway" 
+
+  alertmanager:
+    image: prom/alertmanager:latest
+    volumes:
+      - ./config_alertas.yml:/etc/alertmanager/config_alertas.yml
+    command:
+      - '--config.file=/etc/alertmanager/config_alertas.yml'
+    ports:
+      - "9093:9093"
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025" # Porta que recebe os emails
+      - "8025:8025" # Porta para ler os emails
+  
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-storage:/var/lib/grafana
+
+volumes:
+  grafana-storage:
