@@ -1,10 +1,14 @@
 route:
   receiver: 'equipe_devops'
+  group_by: ['alertname', 'severity']
+  group_wait: 10s
+  group_interval: 1m
+  repeat_interval: 15m
 
 receivers:
   - name: 'equipe_devops'
     email_configs:
       - to: 'pietro1.com@gmail.com'
-        from: 'alertas@monitoriamento.local'
+        from: 'alertas@monitoramento.local'
         smarthost: 'mailhog:1025'
         require_tls: false

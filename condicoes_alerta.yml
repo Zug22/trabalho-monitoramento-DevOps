@@ -20,10 +20,100 @@ groups:
           description: "O servidor Linux está sobrecarregado com {{ $value }}% de uso de CPU."
 
       - alert: Alta_Taxa_Erros_HTTP
-        expr: rate(total_erroshttp[1m]) > 0
+        expr: rate(total_erros_http[1m]) > 0
         for: 15s
         labels:
           severity: critical
         annotations:
           summary: "CRÍTICO: Falhas no Servidor Web"
           description: "A API C++ está retornando erros 500. Taxa atual {{ $value }} erros/segundos."
+
+      - alert: Banco_Indisponivel
+        expr: pg_up == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "CRÍTICO: Banco de dados indisponível"
+          description: "O PostgreSQL não respondeu ao exporter nos últimos ciclos de coleta."
+
+      - alert: Banco_Muitas_Conexoes
+        expr: sum(pg_stat_activity_count) > 20
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Atenção: muitas conexões abertas no banco"
+          description: "O PostgreSQL está com {{ $value }} conexões abertas."
+
+      - alert: Banco_Alta_Taxa_Rollbacks
+        expr: sum(rate(pg_stat_database_xact_rollback[1m])) > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Atenção: rollbacks no banco de dados"
+          description: "Foram detectados rollbacks no PostgreSQL. Taxa atual: {{ $value }} rollback(s)/segundo."
+
+      - alert: Servico_HTTP_Indisponivel
+        expr: probe_success{job="blackbox_http_backend"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "CRITICO: probe HTTP indisponivel"
+          description: "O Blackbox Exporter nao conseguiu validar o endpoint HTTP do backend."
+
+      - alert: SMTP_Indisponivel
+        expr: probe_success{job="blackbox_smtp"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "CRITICO: SMTP indisponivel"
+          description: "O canal SMTP local usado pelo Alertmanager nao respondeu ao teste TCP."
+
+      - alert: DNS_Indisponivel
+        expr: probe_success{job="blackbox_dns"} == 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Atencao: resolucao DNS falhando"
+          description: "O teste DNS do Blackbox Exporter falhou para o resolvedor configurado."
+
+      - alert: Possivel_DDoS_HTTP
+        expr: rate(total_requisicoes_http[30s]) > 50
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "CRITICO: possivel ataque DDoS"
+          description: "O backend recebeu {{ $value }} requisicoes por segundo nos ultimos 30 segundos."
+
+      - alert: Falhas_Autenticacao_Elevadas
+        expr: increase(falhas_login_total[1m]) >= 5
+        for: 15s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Atencao: falhas de autenticacao elevadas"
+          description: "Foram registradas {{ $value }} falhas de login no ultimo minuto."
+
+      - alert: Alteracao_Configuracao
+        expr: changes(configuracao_checksum[5m]) > 0
+        for: 15s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Atencao: arquivo de configuracao alterado"
+          description: "O checksum de {{ $labels.arquivo }} mudou nos ultimos minutos."
+
+      - alert: Vulnerabilidade_Conhecida
+        expr: vulnerabilidades_conhecidas > 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "CRITICO: vulnerabilidade conhecida detectada"
+          description: "O servico {{ $labels.servico }} possui vulnerabilidade conhecida ativa: {{ $labels.cve }}."

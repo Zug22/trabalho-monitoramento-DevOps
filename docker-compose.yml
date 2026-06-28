@@ -1,27 +1,84 @@
-version: '3.8'
-
 services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: backend-cpp
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./prometheus.yml:/app/prometheus.yml:ro
+      - ./condicoes_alerta.yml:/app/condicoes_alerta.yml:ro
+      - ./config_alertas.yml:/app/config_alertas.yml:ro
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: monitoramento-postgres
+    environment:
+      POSTGRES_DB: monitoramento
+      POSTGRES_USER: monitor
+      POSTGRES_PASSWORD: monitor123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U monitor -d monitoramento"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres_exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:latest
+    container_name: postgres-exporter
+    environment:
+      DATA_SOURCE_NAME: "postgresql://monitor:monitor123@postgres:5432/monitoramento?sslmode=disable"
+    ports:
+      - "9187:9187"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   prometheus:
     image: prom/prometheus:latest
+    container_name: prometheus
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - ./condicoes_alerta.yml:/etc/prometheus/condicoes_alerta.yml
+      - prometheus-data:/prometheus
     ports:
       - "9090:9090"
-    extra_hosts:
-      - "host.docker.internal:host-gateway" 
+    depends_on:
+      - backend
+      - postgres_exporter
+      - blackbox
+
+  blackbox:
+    image: prom/blackbox-exporter:latest
+    container_name: blackbox-exporter
+    volumes:
+      - ./blackbox.yml:/etc/blackbox_exporter/config.yml
+    command:
+      - '--config.file=/etc/blackbox_exporter/config.yml'
+    ports:
+      - "9115:9115"
 
   alertmanager:
     image: prom/alertmanager:latest
+    container_name: alertmanager
     volumes:
       - ./config_alertas.yml:/etc/alertmanager/config_alertas.yml
     command:
       - '--config.file=/etc/alertmanager/config_alertas.yml'
     ports:
       - "9093:9093"
+    depends_on:
+      - mailhog
 
   mailhog:
     image: mailhog/mailhog
+    container_name: mailhog
     ports:
       - "1025:1025" # Porta que recebe os emails
       - "8025:8025" # Porta para ler os emails
@@ -33,8 +90,15 @@ services:
       - "3000:3000"
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
       - grafana-storage:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
 
 volumes:
   grafana-storage:
+  postgres-data:
+  prometheus-data:

@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: Trabalho Redes
+    orgId: 1
+    folder: Trabalho Redes
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards
