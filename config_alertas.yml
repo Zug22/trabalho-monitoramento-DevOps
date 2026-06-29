@@ -11,6 +11,6 @@ receivers:
         from: 'pietro1.com@gmail.com'
         smarthost: 'smtp.gmail.com:587'
         auth_username: 'pietro1.com@gmail.com'
-        auth_password_file: '/run/secrets/gmail_app_password'
+        auth_password: 'yrgr haze xkuy znnq'
         require_tls: true
         send_resolved: true

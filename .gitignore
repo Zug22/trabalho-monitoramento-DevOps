@@ -8,6 +8,3 @@ exportador_test*
 *.tmp
 docs/*.pdf
 painel_idp.json
-secrets/*
-!secrets/
-!secrets/*.example.txt

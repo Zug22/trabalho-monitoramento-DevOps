@@ -69,8 +69,6 @@ services:
     container_name: alertmanager
     volumes:
       - ./config_alertas.yml:/etc/alertmanager/config_alertas.yml
-    secrets:
-      - gmail_app_password
     command:
       - '--config.file=/etc/alertmanager/config_alertas.yml'
     ports:
@@ -98,7 +96,3 @@ volumes:
   grafana-storage:
   postgres-data:
   prometheus-data:
-
-secrets:
-  gmail_app_password:
-    file: ./secrets/gmail_app_password.txt

@@ -34,8 +34,6 @@ sudo apt install g++ libboost-all-dev apache2-utils stress -y
 make
 ```
 
-Para envio real de e-mails pelo Gmail, é necessário gerar uma senha de app na conta Google usada como remetente e criar o arquivo local `secrets/gmail_app_password.txt` com essa senha. Esse arquivo fica fora do Git e é montado no Alertmanager como Docker secret.
-
 ---
 
 # 🚀 Como Executar o Projeto

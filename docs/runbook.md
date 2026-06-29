@@ -1,9 +1,5 @@
 # Runbook
 
-## Preparar Gmail
-
-Antes de subir o ambiente, crie uma senha de app na conta Gmail usada pelo Alertmanager e coloque o valor em `secrets/gmail_app_password.txt`. Esse arquivo e ignorado pelo Git.
-
 ## Subir o Ambiente
 
 ```bash

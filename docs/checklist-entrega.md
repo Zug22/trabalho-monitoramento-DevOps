@@ -14,9 +14,8 @@
 
 ## Antes de Entregar
 
-- Criar `secrets/gmail_app_password.txt` com a senha de app do Gmail.
 - Confirmar que todos os containers estao `running`.
 - Disparar um alerta e conferir o e-mail real no Gmail.
-- Compilar o PDF final fora do repositório com o texto atualizado para Gmail.
+- Compilar o PDF final fora do repositorio com o texto atualizado para Gmail.
 - Gravar o video de demonstracao.
 - Subir o repositorio no GitHub.
