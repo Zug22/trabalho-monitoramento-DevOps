@@ -1,0 +1,515 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{indentfirst}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{microtype}
+\usepackage{caption}
+
+\geometry{
+    left=3cm,
+    right=2cm,
+    top=3cm,
+    bottom=2cm
+}
+
+\onehalfspacing
+\setlength{\parindent}{1.25cm}
+\setlength{\parskip}{0.15cm}
+\setlist[itemize]{leftmargin=1.5cm}
+\setlist[enumerate]{leftmargin=1.5cm}
+\renewcommand{\arraystretch}{1.15}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=blue,
+    citecolor=black
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{Redes de Computadores e Internet}
+\rhead{Plataforma de Monitoramento}
+\cfoot{\thepage}
+
+\lstdefinestyle{codigo}{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    columns=fullflexible,
+    backgroundcolor=\color{gray!8},
+    rulecolor=\color{gray!35}
+}
+
+\lstset{style=codigo}
+
+\begin{document}
+
+\begin{titlepage}
+    \begin{center}
+        \textbf{Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa -- IDP}\\[0.4cm]
+        \textbf{Disciplina: Redes de Computadores e Internet}\\[0.4cm]
+        \textbf{Professora: Lorena Borges}\\[3.5cm]
+
+        {\Large \textbf{Plataforma de Monitoramento para DevOps}}\\[0.4cm]
+        {\large Monitoramento de Web Server, Banco de Dados, DNS, SMTP e Eventos de Segurança}\\[3.5cm]
+
+        \vfill
+
+        \textbf{Integrantes:}\\
+        André Barros Soares\\
+        Pietro Branco Rossi
+
+        \vfill
+
+        Brasília -- DF\\
+        2026
+    \end{center}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\begin{abstract}
+Este relatório apresenta o desenvolvimento de uma plataforma de monitoramento para DevOps, construída para acompanhar serviços de rede e componentes de infraestrutura em ambiente conteinerizado. A solução monitora um servidor web desenvolvido em C++, um banco de dados PostgreSQL, serviços DNS e SMTP, além de eventos relacionados à segurança, como picos de tráfego, falhas de autenticação, alterações de configuração e vulnerabilidades conhecidas simuladas. A arquitetura utiliza Docker Compose, Prometheus, Grafana, Alertmanager, Gmail SMTP, Postgres Exporter e Blackbox Exporter. O resultado é um ambiente integrado para coleta de métricas, visualização em dashboards, emissão de alertas por e-mail e execução de testes controlados.
+
+\vspace{0.3cm}
+\noindent\textbf{Palavras-chave:} redes de computadores; monitoramento; DevOps; Prometheus; Grafana; segurança.
+\end{abstract}
+
+\section{Introdução}
+
+Ambientes computacionais modernos dependem de diversos serviços operando de forma integrada. Servidores web, bancos de dados, serviços de resolução de nomes, canais de e-mail e mecanismos de autenticação precisam estar disponíveis e funcionando com desempenho adequado. Quando um desses componentes apresenta falha, lentidão ou comportamento anormal, a equipe responsável precisa identificar rapidamente a causa e responder ao incidente.
+
+Nesse contexto, plataformas de monitoramento são fundamentais. Elas permitem acompanhar métricas de disponibilidade, latência, volume de acessos, taxa de erros, conexões ativas e eventos de segurança. Além disso, dashboards e alertas automatizados facilitam a observação contínua do ambiente e reduzem o tempo necessário para detectar e tratar problemas.
+
+O projeto desenvolvido consiste em uma plataforma de monitoramento para DevOps, com foco em serviços de rede. A solução foi estruturada para atender aos requisitos propostos na disciplina de Redes de Computadores e Internet, contemplando front-end responsivo, dashboards, backend de métricas, banco de dados, regras de alerta, notificações por e-mail e documentação operacional.
+
+\section{Objetivos}
+
+\subsection{Objetivo Geral}
+
+Projetar e implementar uma plataforma de monitoramento capaz de acompanhar a saúde de serviços de rede e infraestrutura, apresentando métricas em dashboards e notificando situações de degradação ou indisponibilidade.
+
+\subsection{Objetivos Específicos}
+
+\begin{itemize}
+    \item Implementar um front-end responsivo com visão consolidada dos serviços monitorados.
+    \item Desenvolver um backend em C++ para simular um serviço web e expor métricas em formato compatível com Prometheus.
+    \item Adicionar um banco de dados PostgreSQL ao ambiente e monitorar suas métricas.
+    \item Monitorar disponibilidade e tempo de resposta de serviços HTTP, DNS e SMTP.
+    \item Configurar dashboards no Grafana para visualização das métricas.
+    \item Criar regras de alerta com níveis de atenção e criticidade.
+    \item Enviar notificações de alerta por e-mail por meio do Gmail SMTP.
+    \item Implementar cenários de teste relacionados a segurança e comportamento anormal.
+    \item Documentar arquitetura, execução, testes e resposta a incidentes.
+\end{itemize}
+
+\section{Requisitos do Trabalho}
+
+O enunciado do trabalho solicita uma plataforma de monitoramento de serviços de rede, com dashboards, coleta e armazenamento de métricas, alertas e documentação. A Tabela \ref{tab:requisitos} apresenta a relação entre os requisitos e a implementação realizada.
+
+\begin{longtable}{p{5cm} p{9cm}}
+\caption{Atendimento aos requisitos do trabalho.}
+\label{tab:requisitos}\\
+\toprule
+\textbf{Requisito} & \textbf{Implementação realizada} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Requisito} & \textbf{Implementação realizada} \\
+\midrule
+\endhead
+Front-end responsivo & Dashboard próprio servido pelo backend C++ em \texttt{http://localhost:8080}. \\
+Dashboards por serviço & Dashboard no Grafana com métricas de web server, banco de dados, DNS, SMTP e segurança. \\
+Visão consolidada & Tela principal com resumo dos indicadores essenciais e links para Prometheus, Grafana, Gmail e laboratório de testes. \\
+Backend de ingestão e armazenamento & Backend C++ expõe métricas; Prometheus coleta e armazena séries temporais; PostgreSQL representa a camada de armazenamento operacional. \\
+Regras de alerta & Arquivo \texttt{condicoes\_alerta.yml} com alertas para CPU, HTTP, banco, DNS, SMTP e eventos de segurança. \\
+Notificação por e-mail & Alertmanager configurado para enviar alertas por meio do servidor SMTP do Gmail. \\
+Documentação & Arquivos de arquitetura, runbook, playbooks, roteiro de vídeo e relatório técnico. \\
+Testes de navegação e uso & Laboratório de ataques e roteiro de testes para demonstração dos alertas e dashboards. \\
+Monitoramentos extras & Detecção de picos de tráfego, falhas de autenticação, alterações de configuração e vulnerabilidades conhecidas simuladas. \\
+\bottomrule
+\end{longtable}
+
+\section{Arquitetura da Solução}
+
+A plataforma foi estruturada com serviços em contêineres, utilizando Docker Compose para facilitar a execução e a reprodução do ambiente. Essa abordagem permite subir todos os componentes necessários com um único comando, evitando configurações manuais extensas.
+
+\subsection{Componentes Principais}
+
+\begin{longtable}{p{4.5cm} p{9.5cm}}
+\caption{Componentes da arquitetura.}
+\label{tab:componentes}\\
+\toprule
+\textbf{Componente} & \textbf{Responsabilidade} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Componente} & \textbf{Responsabilidade} \\
+\midrule
+\endhead
+Backend C++ & Servir o front-end, simular a aplicação web, expor métricas e fornecer rotas de simulação de incidentes. \\
+PostgreSQL & Banco de dados da plataforma, inicializado com tabelas para métricas e incidentes. \\
+Postgres Exporter & Exportar métricas internas do PostgreSQL para o Prometheus. \\
+Prometheus & Coletar métricas, armazenar séries temporais e avaliar regras de alerta. \\
+Grafana & Exibir dashboards operacionais com base nos dados coletados pelo Prometheus. \\
+Alertmanager & Receber alertas do Prometheus e encaminhar notificações por e-mail. \\
+Gmail SMTP & Serviço externo utilizado para envio real das mensagens de alerta. \\
+Blackbox Exporter & Executar probes de disponibilidade e latência para HTTP, DNS e SMTP. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Fluxo de Dados}
+
+O backend C++ expõe métricas no endpoint \texttt{/metrics}. O Prometheus coleta essas métricas periodicamente, juntamente com dados do Postgres Exporter e do Blackbox Exporter. O Grafana consulta o Prometheus para renderizar os dashboards. Quando uma condição de alerta é atendida, o Prometheus encaminha o alerta ao Alertmanager. O Alertmanager, por sua vez, envia a notificação por e-mail utilizando o SMTP do Gmail.
+
+\begin{center}
+\vspace{0.5cm}
+\framebox[0.9\textwidth]{
+\begin{minipage}{0.8\textwidth}
+\centering
+\vspace{0.3cm}
+\textbf{Backend C++} $\rightarrow$ \textbf{Prometheus} $\rightarrow$ \textbf{Grafana}\\[0.2cm]
+\textbf{PostgreSQL} $\rightarrow$ \textbf{Postgres Exporter} $\rightarrow$ \textbf{Prometheus}\\[0.2cm]
+\textbf{HTTP/DNS/SMTP} $\rightarrow$ \textbf{Blackbox Exporter} $\rightarrow$ \textbf{Prometheus}\\[0.2cm]
+\textbf{Prometheus} $\rightarrow$ \textbf{Alertmanager} $\rightarrow$ \textbf{Gmail SMTP}
+\vspace{0.3cm}
+\end{minipage}
+}
+\vspace{0.5cm}
+\end{center}
+
+\section{Tecnologias Utilizadas}
+
+\subsection{C++ e Crow}
+O backend foi implementado em C++ com a biblioteca Crow. A aplicação simula um servidor web real, processa requisições, registra contadores e expõe métricas em texto no formato utilizado pelo Prometheus.
+
+\subsection{Docker Compose}
+O Docker Compose foi utilizado para orquestrar os serviços do ambiente. A plataforma inclui contêineres para backend, PostgreSQL, Postgres Exporter, Prometheus, Blackbox Exporter, Alertmanager e Grafana.
+
+\subsection{Prometheus}
+O Prometheus atua como mecanismo central de coleta e armazenamento de séries temporais. Ele executa scraping periódico dos endpoints configurados e avalia as regras de alerta.
+
+\subsection{Grafana}
+O Grafana é responsável pela visualização das métricas. O projeto utiliza provisionamento automático de datasource e dashboard, permitindo que os painéis estejam disponíveis assim que o ambiente é iniciado.
+
+\subsection{Alertmanager e Gmail SMTP}
+O Alertmanager organiza e encaminha alertas. O envio de e-mail foi configurado por meio do servidor \texttt{smtp.gmail.com}, na porta 587, com TLS. Dessa forma, os alertas gerados pelo Prometheus são entregues em uma caixa de entrada real, permitindo validar o fluxo completo de notificação.
+
+\subsection{PostgreSQL e Postgres Exporter}
+O PostgreSQL representa o banco de dados da plataforma. O Postgres Exporter coleta métricas do banco e as disponibiliza para o Prometheus.
+
+\subsection{Blackbox Exporter}
+O Blackbox Exporter executa testes externos de disponibilidade e tempo de resposta. No projeto, ele é utilizado para monitorar HTTP, DNS e SMTP.
+
+\section{Implementação do Backend}
+
+O backend C++ disponibiliza tanto a interface visual quanto os endpoints de métricas e simulação. As principais rotas implementadas são:
+
+\begin{itemize}
+    \item \texttt{/}: dashboard principal da plataforma.
+    \item \texttt{/ataques}: laboratório de ataques e simulações controladas.
+    \item \texttt{/api/trabalho}: rota que simula a aplicação web monitorada.
+    \item \texttt{/api/simular/login-falho}: simula falhas de autenticação.
+    \item \texttt{/api/simular/configuracao}: simula alteração de configuração.
+    \item \texttt{/api/simular/vulnerabilidade}: ativa uma vulnerabilidade conhecida simulada.
+    \item \texttt{/api/simular/vulnerabilidade/resolver}: resolve a vulnerabilidade simulada.
+    \item \texttt{/metrics}: expõe as métricas consumidas pelo Prometheus.
+\end{itemize}
+
+A rota \texttt{/api/trabalho} simula o comportamento de um serviço web. Ela incrementa contadores de requisições, registra conexões ativas, calcula latência e gera erros HTTP de forma controlada. Com isso, é possível observar variações nas métricas durante os testes.
+
+\section{Front-end da Plataforma}
+
+O projeto possui duas telas principais. A primeira é o painel de monitoramento em \texttt{http://localhost:8080}. Essa tela apresenta os indicadores principais do ambiente, incluindo disponibilidade, CPU, requisições, erros HTTP, latência, conexões ativas, falhas de login e vulnerabilidades.
+
+A segunda tela é o laboratório de ataques, disponível em \texttt{http://localhost:8080/ataques}. Ela foi criada para facilitar a apresentação do trabalho e permitir a geração de eventos diretamente pelo navegador.
+
+\subsection{Dashboard Principal}
+O dashboard principal apresenta uma visão consolidada dos serviços monitorados. Ele também contém atalhos para Prometheus, Grafana, Gmail e laboratório de ataques. A interface foi construída de forma responsiva, permitindo uso em diferentes tamanhos de tela.
+
+\subsection{Laboratório de Ataques}
+O laboratório de ataques permite executar testes controlados contra a própria aplicação. Os cenários disponíveis são:
+
+\begin{itemize}
+    \item Pico HTTP ou DDoS local.
+    \item Brute force de login.
+    \item Alteração de configuração simulada.
+    \item Vulnerabilidade conhecida simulada.
+\end{itemize}
+
+Essa tela também apresenta métricas ao vivo, permitindo observar o efeito das simulações sobre os contadores expostos pelo backend.
+
+\section{Banco de Dados}
+
+O banco de dados utilizado é o PostgreSQL. Ele é iniciado automaticamente pelo Docker Compose e recebe um script de inicialização com tabelas para métricas e incidentes. A inclusão do banco atende ao requisito de armazenamento da plataforma e permite monitorar um serviço adicional.
+
+As principais informações monitoradas no banco incluem disponibilidade, número de conexões abertas, transações, rollbacks e tamanho do banco.
+
+\section{Métricas Monitoradas}
+
+\subsection{Web Server}
+O servidor web C++ expõe as seguintes métricas:
+\begin{itemize}
+    \item \texttt{servidor\_web\_up}: indica se o servidor está disponível.
+    \item \texttt{total\_requisicoes\_http}: total acumulado de requisições.
+    \item \texttt{total\_erros\_http}: total acumulado de erros HTTP.
+    \item \texttt{ultima\_latencia\_ms}: latência da última resposta em milissegundos.
+    \item \texttt{conexoes\_ativas}: quantidade de conexões ativas no momento.
+\end{itemize}
+
+\subsection{Banco de Dados}
+O monitoramento do PostgreSQL é feito pelo Postgres Exporter. As principais métricas utilizadas são:
+\begin{itemize}
+    \item \texttt{pg\_up}: disponibilidade do banco.
+    \item \texttt{pg\_stat\_activity\_count}: número de conexões abertas.
+    \item \texttt{pg\_stat\_database\_xact\_commit}: transações confirmadas.
+    \item \texttt{pg\_stat\_database\_xact\_rollback}: transações revertidas.
+    \item \texttt{pg\_database\_size\_bytes}: tamanho do banco.
+\end{itemize}
+
+\subsection{DNS}
+O DNS é monitorado por meio do Blackbox Exporter. O probe verifica se uma consulta DNS pode ser resolvida corretamente e se o serviço responde dentro do tempo esperado.
+
+\subsection{SMTP}
+O SMTP é monitorado por um probe TCP direcionado ao endereço \texttt{smtp.gmail.com:587}. Dessa forma, é possível verificar se o canal externo utilizado para envio de e-mails está acessível a partir do ambiente.
+
+\subsection{Segurança}
+Os eventos de segurança monitorados são:
+\begin{itemize}
+    \item Pico de tráfego, utilizado como indicador de possível ataque de negação de serviço.
+    \item Falhas de autenticação, associadas a tentativas de brute force.
+    \item Alterações de configuração, detectadas por meio de checksum.
+    \item Vulnerabilidade conhecida simulada, usada para demonstrar um alerta crítico.
+\end{itemize}
+
+\section{Regras de Alerta}
+
+As regras de alerta foram configuradas no arquivo \texttt{condicoes\_alerta.yml}. Elas são avaliadas periodicamente pelo Prometheus. Quando uma condição é atendida durante o tempo configurado, o alerta é enviado ao Alertmanager.
+
+\begin{longtable}{p{4.5cm} p{2.5cm} p{7cm}}
+\caption{Principais alertas implementados.}
+\label{tab:alertas}\\
+\toprule
+\textbf{Alerta} & \textbf{Severidade} & \textbf{Condição monitorada} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Alerta} & \textbf{Severidade} & \textbf{Condição monitorada} \\
+\midrule
+\endhead
+Alerta\_CPU\_Amarelo & Warning & CPU acima de 70\%. \\
+Alerta\_CPU\_Vermelho & Critical & CPU acima de 90\%. \\
+Alta\_Taxa\_Erros\_HTTP & Critical & Erros HTTP detectados na aplicação. \\
+Banco\_Indisponivel & Critical & PostgreSQL sem resposta pelo exporter. \\
+Banco\_Muitas\_Conexoes & Warning & Número elevado de conexões abertas. \\
+Banco\_Alta\_Taxa\_Rollbacks & Warning & Rollbacks no banco de dados. \\
+Servico\_HTTP\_Indisponivel & Critical & Probe HTTP falhando. \\
+SMTP\_Indisponivel & Critical & SMTP do Gmail sem resposta. \\
+DNS\_Indisponivel & Warning & Falha no teste DNS. \\
+Possivel\_DDoS\_HTTP & Critical & Volume elevado de requisições. \\
+Falhas\_Autenticacao\_Elevadas & Warning & Muitas falhas de login em curto período. \\
+Alteracao\_Configuracao & Warning & Mudança detectada em checksum de configuração. \\
+Vulnerabilidade\_Conhecida & Critical & Vulnerabilidade simulada ativa. \\
+\bottomrule
+\end{longtable}
+
+\section{Notificações por E-mail}
+
+O envio de notificações é feito pelo Alertmanager. No ambiente implementado, o Alertmanager utiliza o servidor SMTP do Gmail, com TLS na porta 587, para encaminhar os alertas gerados pelo Prometheus. Essa configuração permite demonstrar o envio real de e-mails a partir de uma condição crítica detectada pelo sistema de monitoramento.
+
+O fluxo de notificação ocorre da seguinte forma:
+\begin{enumerate}
+    \item O Prometheus avalia uma regra de alerta.
+    \item A condição permanece ativa pelo tempo configurado.
+    \item O alerta é enviado ao Alertmanager.
+    \item O Alertmanager encaminha o e-mail pelo Gmail SMTP.
+    \item O e-mail pode ser visualizado na caixa de entrada do Gmail configurada no projeto.
+\end{enumerate}
+
+\section{Execução do Projeto}
+
+Para executar a plataforma completa, utiliza-se o comando:
+
+\begin{lstlisting}[language=bash]
+docker compose up -d --build
+\end{lstlisting}
+
+Após a execução, os serviços ficam disponíveis nos endereços apresentados na Tabela \ref{tab:urls}.
+
+\begin{longtable}{p{4cm} p{6cm} p{4cm}}
+\caption{Endereços da plataforma.}
+\label{tab:urls}\\
+\toprule
+\textbf{Serviço} & \textbf{URL ou endpoint} & \textbf{Finalidade} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Serviço} & \textbf{URL ou endpoint} & \textbf{Finalidade} \\
+\midrule
+\endhead
+Front principal & \url{http://localhost:8080} & Visão consolidada. \\
+Laboratório & \url{http://localhost:8080/ataques} & Testes e simulações. \\
+Prometheus & \url{http://localhost:9090} & Métricas e regras. \\
+Grafana & \url{http://localhost:3000} & Dashboards. \\
+Alertmanager & \url{http://localhost:9093} & Gerência de alertas. \\
+Gmail & \url{https://mail.google.com} & Caixa de entrada dos alertas. \\
+Postgres Exporter & \url{http://localhost:9187} & Métricas do banco. \\
+Blackbox Exporter & \url{http://localhost:9115} & Probes de rede. \\
+\bottomrule
+\end{longtable}
+
+\section{Testes e Validação}
+
+A validação da plataforma envolve navegação, consulta de métricas, geração de carga e acionamento de alertas. Os testes podem ser feitos pelo laboratório de ataques ou por linha de comando.
+
+\subsection{Teste de Navegação}
+\begin{enumerate}
+    \item Abrir o front principal em \url{http://localhost:8080}.
+    \item Verificar os cards de métricas.
+    \item Abrir o laboratório em \url{http://localhost:8080/ataques}.
+    \item Abrir o Grafana em \url{http://localhost:3000}.
+    \item Consultar os targets do Prometheus em \url{http://localhost:9090/targets}.
+    \item Verificar a caixa de entrada do Gmail após o disparo de alertas.
+\end{enumerate}
+
+\subsection{Teste de Carga HTTP}
+O teste de carga HTTP pode ser executado pelo laboratório de ataques ou pelo comando:
+
+\begin{lstlisting}[language=bash]
+ab -n 20000 -c 100 http://localhost:8080/api/trabalho
+\end{lstlisting}
+
+Esse teste aumenta o volume de requisições e permite observar RPS, latência, conexões ativas e erros HTTP.
+
+\subsection{Teste de Falhas de Autenticação}
+\begin{lstlisting}[language=bash]
+for i in {1..6}; do curl -i http://localhost:8080/api/simular/login-falho; done
+\end{lstlisting}
+
+Esse teste incrementa a métrica de falhas de login e permite acionar o alerta de autenticação.
+
+\subsection{Teste de Vulnerabilidade Conhecida}
+\begin{lstlisting}[language=bash]
+curl http://localhost:8080/api/simular/vulnerabilidade
+curl http://localhost:8080/api/simular/vulnerabilidade/resolver
+\end{lstlisting}
+
+O primeiro comando ativa a vulnerabilidade simulada, enquanto o segundo remove a condição crítica.
+
+\subsection{Teste de Alteração de Configuração}
+\begin{lstlisting}[language=bash]
+curl http://localhost:8080/api/simular/configuracao
+\end{lstlisting}
+
+Esse teste altera uma métrica de checksum simulada e permite demonstrar o alerta de alteração de configuração.
+
+\section{Runbook de Operação}
+
+O runbook define ações básicas para operar o ambiente.
+
+\subsection{Subir a Plataforma}
+\begin{lstlisting}[language=bash]
+docker compose up -d --build
+\end{lstlisting}
+
+\subsection{Verificar Containers}
+\begin{lstlisting}[language=bash]
+docker compose ps
+\end{lstlisting}
+
+\subsection{Consultar Logs}
+\begin{lstlisting}[language=bash]
+docker compose logs backend
+docker compose logs prometheus
+docker compose logs grafana
+docker compose logs alertmanager
+\end{lstlisting}
+
+\subsection{Parar a Plataforma}
+\begin{lstlisting}[language=bash]
+docker compose down
+\end{lstlisting}
+
+\section{Playbooks de Incidentes}
+
+\subsection{CPU Alta}
+Quando houver alerta de CPU alta, deve-se verificar se há teste de carga em andamento, consultar os gráficos do Grafana e analisar os logs do backend.
+
+\subsection{Erros HTTP}
+Em caso de aumento de erros HTTP, deve-se verificar a rota \texttt{/api/trabalho}, observar a taxa de erro no Grafana e confirmar se há simulação ativa no laboratório de ataques.
+
+\subsection{Banco Indisponível}
+Para alerta de banco indisponível, deve-se verificar o container do PostgreSQL, consultar os logs do banco e confirmar se o Postgres Exporter está respondendo.
+
+\subsection{Falhas de Autenticação}
+Quando houver muitas falhas de autenticação, deve-se verificar se a simulação de brute force foi executada. Em um ambiente real, a resposta envolveria bloqueio temporário, análise de origem e reforço de autenticação.
+
+\subsection{Vulnerabilidade Conhecida}
+Quando a vulnerabilidade simulada estiver ativa, o alerta crítico demonstra a necessidade de identificar o serviço afetado, corrigir a versão vulnerável e validar a resolução.
+
+\section{Resultados}
+
+O projeto resultou em uma plataforma funcional de monitoramento. A solução permite observar métricas do web server, banco de dados, DNS, SMTP e eventos de segurança. Também permite gerar cenários de teste diretamente pelo navegador, facilitando a demonstração dos alertas.
+
+Os principais resultados alcançados foram:
+\begin{itemize}
+    \item Dashboard próprio responsivo.
+    \item Laboratório de ataques controlados.
+    \item Dashboard Grafana provisionado automaticamente.
+    \item Coleta de métricas pelo Prometheus.
+    \item Monitoramento de banco PostgreSQL.
+    \item Probes HTTP, DNS e SMTP.
+    \item Envio de alertas reais por e-mail usando Gmail SMTP.
+    \item Documentação técnica e operacional.
+\end{itemize}
+
+\section{Limitações}
+
+Algumas métricas avançadas foram simplificadas para adequação ao ambiente acadêmico. Por exemplo, slow queries reais, autenticação com usuários reais e persistência automática de incidentes no banco não foram implementadas de forma produtiva. No entanto, o projeto apresenta simulações controladas suficientes para demonstrar o comportamento da plataforma e o acionamento dos alertas.
+
+\section{Trabalhos Futuros}
+
+Como trabalhos futuros, seria possível:
+\begin{itemize}
+    \item Implementar autenticação real no front-end.
+    \item Persistir incidentes automaticamente no PostgreSQL.
+    \item Coletar logs estruturados.
+    \item Adicionar métricas reais de slow queries.
+    \item Implantar a plataforma em ambiente de nuvem.
+    \item Adicionar autenticação e controle de acesso aos dashboards.
+    \item Substituir credenciais fixas por gerenciamento externo de segredos.
+\end{itemize}
+
+\section{Conclusão}
+
+A plataforma desenvolvida demonstra como ferramentas de observabilidade podem ser integradas para monitorar serviços de rede e aplicações. Com Prometheus, Grafana, Alertmanager, Gmail SMTP, PostgreSQL e exporters, foi possível construir um ambiente completo para coleta de métricas, visualização, alertas e testes controlados.
+
+O projeto atende aos principais requisitos propostos no trabalho final, incluindo front-end responsivo, dashboards por serviço, backend de métricas, banco de dados, alertas por e-mail, documentação e monitoramentos extras de segurança. A solução também apresenta um laboratório de ataques controlados, que facilita a validação dos alertas e a demonstração prática da plataforma.
+
+\begin{thebibliography}{9}
+    \bibitem{prometheus} PROMETHEUS. \textit{Prometheus Documentation}. Disponível em: \url{https://prometheus.io/docs/}.
+    \bibitem{grafana} GRAFANA LABS. \textit{Grafana Documentation}. Disponível em: \url{https://grafana.com/docs/}.
+    \bibitem{alertmanager} PROMETHEUS. \textit{Alertmanager Documentation}. Disponível em: \url{https://prometheus.io/docs/alerting/latest/alertmanager/}.
+    \bibitem{postgres} POSTGRESQL. \textit{PostgreSQL Documentation}. Disponível em: \url{https://www.postgresql.org/docs/}.
+    \bibitem{pg_exporter} PROMETHEUS COMMUNITY. \textit{Postgres Exporter}. Disponível em: \url{https://github.com/prometheus-community/postgres_exporter}.
+    \bibitem{blackbox} PROMETHEUS. \textit{Blackbox Exporter}. Disponível em: \url{https://github.com/prometheus/blackbox_exporter}.
+    \bibitem{gmail} GOOGLE. \textit{Enviar e-mail por SMTP com Gmail}. Disponível em: \url{https://support.google.com/mail/answer/7126229}.
+    \bibitem{docker} DOCKER. \textit{Docker Compose Documentation}. Disponível em: \url{https://docs.docker.com/compose/}.
+\end{thebibliography}
+
+\end{document}
