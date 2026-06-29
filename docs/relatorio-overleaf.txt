@@ -324,7 +324,7 @@ Os eventos de segurança monitorados são:
 
 As regras de alerta foram configuradas no arquivo \texttt{condicoes\_alerta.yml}. Elas são avaliadas periodicamente pelo Prometheus. Quando uma condição é atendida durante o tempo configurado, o alerta é enviado ao Alertmanager.
 
-\begin{longtable}{p{4.5cm} p{2.5cm} p{7cm}}
+\begin{longtable}{p{4.2cm} p{2.4cm} p{7.2cm}}
 \caption{Principais alertas implementados.}
 \label{tab:alertas}\\
 \toprule
@@ -335,19 +335,19 @@ As regras de alerta foram configuradas no arquivo \texttt{condicoes\_alerta.yml}
 \textbf{Alerta} & \textbf{Severidade} & \textbf{Condição monitorada} \\
 \midrule
 \endhead
-Alerta\_CPU\_Amarelo & Warning & CPU acima de 70\%. \\
-Alerta\_CPU\_Vermelho & Critical & CPU acima de 90\%. \\
-Alta\_Taxa\_Erros\_HTTP & Critical & Erros HTTP detectados na aplicação. \\
-Banco\_Indisponivel & Critical & PostgreSQL sem resposta pelo exporter. \\
-Banco\_Muitas\_Conexoes & Warning & Número elevado de conexões abertas. \\
-Banco\_Alta\_Taxa\_Rollbacks & Warning & Rollbacks no banco de dados. \\
-Servico\_HTTP\_Indisponivel & Critical & Probe HTTP falhando. \\
-SMTP\_Indisponivel & Critical & SMTP do Gmail sem resposta. \\
-DNS\_Indisponivel & Warning & Falha no teste DNS. \\
-Possivel\_DDoS\_HTTP & Critical & Volume elevado de requisições. \\
-Falhas\_Autenticacao\_Elevadas & Warning & Muitas falhas de login em curto período. \\
-Alteracao\_Configuracao & Warning & Mudança detectada em checksum de configuração. \\
-Vulnerabilidade\_Conhecida & Critical & Vulnerabilidade simulada ativa. \\
+CPU alta (amarelo) & Warning & CPU acima de 70\%. \\
+CPU alta (vermelho) & Critical & CPU acima de 90\%. \\
+Erros HTTP elevados & Critical & Erros HTTP detectados na aplicação. \\
+Banco indisponível & Critical & PostgreSQL sem resposta pelo exporter. \\
+Muitas conexões no banco & Warning & Número elevado de conexões abertas. \\
+Rollbacks no banco & Warning & Rollbacks no banco de dados. \\
+HTTP indisponível & Critical & Probe HTTP falhando. \\
+SMTP indisponível & Critical & SMTP do Gmail sem resposta. \\
+DNS indisponível & Warning & Falha no teste DNS. \\
+Possível DDoS HTTP & Critical & Volume elevado de requisições. \\
+Falhas de autenticação & Warning & Muitas falhas de login em curto período. \\
+Alteração de configuração & Warning & Mudança detectada em checksum de configuração. \\
+Vulnerabilidade conhecida & Critical & Vulnerabilidade simulada ativa. \\
 \bottomrule
 \end{longtable}
 
