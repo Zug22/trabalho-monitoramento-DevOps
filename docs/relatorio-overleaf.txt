@@ -78,7 +78,10 @@
         \vfill
 
         Brasília -- DF\\
-        2026
+        2026\\[0.6cm]
+
+        \textbf{Repositório:}\\
+        \url{https://github.com/Zug22/trabalho-monitoramento-DevOps}
     \end{center}
 \end{titlepage}
 
@@ -379,6 +382,12 @@ Para executar a plataforma completa, utiliza-se o comando:
 docker compose up -d --build
 \end{lstlisting}
 
+O código-fonte, os arquivos de configuração, os dashboards provisionados e a documentação de apoio estão disponíveis no repositório público do projeto:
+
+\begin{center}
+\url{https://github.com/Zug22/trabalho-monitoramento-DevOps}
+\end{center}
+
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.95\textwidth]{containers-docker.jpeg}
@@ -405,6 +414,7 @@ Prometheus & \url{http://localhost:9090} & Métricas e regras. \\
 Grafana & \url{http://localhost:3000} & Dashboards. \\
 Alertmanager & \url{http://localhost:9093} & Gerência de alertas. \\
 Gmail & \url{https://mail.google.com} & Caixa de entrada dos alertas. \\
+Repositório & \url{https://github.com/Zug22/trabalho-monitoramento-DevOps} & Código-fonte e documentação. \\
 Postgres Exporter & \url{http://localhost:9187} & Métricas do banco. \\
 Blackbox Exporter & \url{http://localhost:9115} & Probes de rede. \\
 \bottomrule
