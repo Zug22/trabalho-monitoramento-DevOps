@@ -433,8 +433,8 @@ int main() {
             </div>
             <nav class="nav" aria-label="Navegacao principal">
                 <a href="/ataques">Laboratorio</a>
-                <a href="http://localhost:3000">Grafana</a>
-                <a href="http://localhost:9090">Prometheus</a>
+                <a href="http://localhost:3000/d/monitoramento-devops-redes/monitoramento-devops-trabalho-redes?orgId=1&from=now-15m&to=now&timezone=browser&refresh=5s" target="_blank">Grafana <span>:3000</span></a>
+                <a href="http://localhost:9090" target="_blank">Prometheus <span>:9090</span></a>
                 <div class="status"><span class="dot"></span><span id="coleta">Coletando metricas</span></div>
             </nav>
         </div>
@@ -527,11 +527,11 @@ int main() {
             <aside class="card">
                 <h2 class="section-title">Atalhos</h2>
                 <div class="links">
-                    <a href="/metrics">Metricas raw <span>/metrics</span></a>
-                    <a href="/ataques">Laboratorio de ataques <span>/ataques</span></a>
-                    <a href="http://localhost:9090">Prometheus <span>:9090</span></a>
-                    <a href="http://localhost:3000">Grafana <span>:3000</span></a>
-                    <a href="http://localhost:8025">MailHog <span>:8025</span></a>
+                    <a href="/metrics" target="_blank">Metricas raw <span>/metrics</span></a>
+                    <a href="/ataques" target="_blank">Laboratorio de ataques <span>/ataques</span></a>
+                    <a href="http://localhost:9090" target="_blank">Prometheus <span>:9090</span></a>
+		    <a href="http://localhost:3000/d/monitoramento-devops-redes/monitoramento-devops-trabalho-redes?orgId=1&from=now-15m&to=now&timezone=browser&refresh=5s&kiosk=tv"target="_blank">Grafana <span>:3000</span></a>
+		    <a href="http://localhost:8025" target="_blank">MailHog <span>:8025</span> <span id="mailhog-badge" style="display:none;background:#e53;color:#fff;border-radius:50%;padding:0 6px;font-size:0.75em;margin-left:4px;">!</span></a>
                 </div>
                 <div class="actions">
                     <button type="button" data-simulate="/api/simular/login-falho">Simular login falho</button>
@@ -606,6 +606,17 @@ int main() {
 
         refresh();
         setInterval(refresh, 5000);
+
+        async function checkMailhog() {
+            try {
+                const r = await fetch('/api/mailhog/count',{cache: 'no-store'});
+                const d = await r.json();
+                const badge = document.getElementById('mailhog-badge');
+                if (badge) badge.style.display = d.total > 0 ? 'inline' : 'none';
+            } catch(e) {}
+        }
+        checkMailhog();
+        setInterval(checkMailhog, 5000);
     </script>
 </body>
 </html>
@@ -1014,9 +1025,9 @@ int main() {
             </div>
             <nav class="nav" aria-label="Atalhos">
                 <a href="/">Monitoramento</a>
-                <a href="http://localhost:3000">Grafana</a>
-                <a href="http://localhost:9090">Prometheus</a>
-                <a href="http://localhost:8025">MailHog</a>
+                <a href="http://localhost:3000/d/monitoramento-devops-redes/monitoramento-devops-trabalho-redes?orgId=1&from=now-15m&to=now&timezone=browser&refresh=5s" target="_blank">Grafana <span>:3000</span></a>
+                <a href="http://localhost:9090" target="_blank">Prometheus <span>:9090</span></a>
+                <a href="http://localhost:8025" target="_blank">MailHog <span>:8025</span> <span id="mailhog-badge" style="display:none;background:#e53;color:#fff;border-radius:50%;padding:0 6px;font-size:0.75em;margin-left:4px;">!</span></a>
             </nav>
         </div>
     </header>
@@ -1145,8 +1156,8 @@ int main() {
 
         async function runHttpAttack() {
             const button = document.getElementById('http-run');
-            const total = clampNumber(document.getElementById('http-total').value, 10, 2000);
-            const concurrency = clampNumber(document.getElementById('http-concurrency').value, 1, 50);
+            const total = clampNumber(document.getElementById('http-total').value, 10, 100000);
+            const concurrency = clampNumber(document.getElementById('http-concurrency').value, 1, 500);
             button.disabled = true;
             document.getElementById('http-log').textContent = 'Executando pico HTTP local...';
             setProgress('http-bar', 0, total);
@@ -1158,7 +1169,7 @@ int main() {
 
         async function runLoginAttack() {
             const button = document.getElementById('login-run');
-            const total = clampNumber(document.getElementById('login-total').value, 1, 200);
+            const total = clampNumber(document.getElementById('login-total').value, 1, 100000);
             const delay = clampNumber(document.getElementById('login-delay').value, 0, 2000);
             button.disabled = true;
             setProgress('login-bar', 0, total);
@@ -1327,6 +1338,20 @@ int main() {
 
         crow::response resposta(metrica);
         resposta.add_header("Content-Type", "text/plain; version=0.0.4");
+        return resposta;
+    });
+
+    CROW_ROUTE(app, "/api/mailhog/count")
+    ([](){
+        FILE* pipe = popen("curl -s http://mailhog:8025/api/v2/messages?limit=1", "r");
+        if (!pipe) return crow::response(500, "erro");
+        char buffer[4096];
+        string result = "";
+        while (fgets(buffer, sizeof(buffer), pipe) != NULL) result += buffer;
+        pclose(pipe);
+        crow::response resposta(result);
+        resposta.add_header("Content-Type", "application/json");
+        resposta.add_header("Access-Control-Allow-Origin", "*");
         return resposta;
     });
 

@@ -4,11 +4,12 @@ route:
   group_wait: 10s
   group_interval: 1m
   repeat_interval: 15m
-
 receivers:
   - name: 'equipe_devops'
     email_configs:
       - to: 'pietro1.com@gmail.com'
-        from: 'alertas@monitoramento.local'
-        smarthost: 'mailhog:1025'
-        require_tls: false
+        from: 'pietro1.com@gmail.com'
+        smarthost: 'smtp.gmail.com:587'
+        auth_username: 'pietro1.com@gmail.com'
+        auth_password: 'yrgr haze xkuy znnq'
+        require_tls: true
