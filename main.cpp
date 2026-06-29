@@ -504,7 +504,7 @@ int main() {
                 <div class="health-row">
                     <div>
                         <strong>Alertas por e-mail</strong>
-                        <div>Alertmanager envia para MailHog em ambiente local</div>
+                        <div>Alertmanager envia alertas reais via Gmail SMTP</div>
                     </div>
                     <span class="badge ok">Configurado</span>
                 </div>
@@ -530,8 +530,8 @@ int main() {
                     <a href="/metrics" target="_blank">Metricas raw <span>/metrics</span></a>
                     <a href="/ataques" target="_blank">Laboratorio de ataques <span>/ataques</span></a>
                     <a href="http://localhost:9090" target="_blank">Prometheus <span>:9090</span></a>
-		    <a href="http://localhost:3000/d/monitoramento-devops-redes/monitoramento-devops-trabalho-redes?orgId=1&from=now-15m&to=now&timezone=browser&refresh=5s&kiosk=tv"target="_blank">Grafana <span>:3000</span></a>
-		    <a href="http://localhost:8025" target="_blank">MailHog <span>:8025</span> <span id="mailhog-badge" style="display:none;background:#e53;color:#fff;border-radius:50%;padding:0 6px;font-size:0.75em;margin-left:4px;">!</span></a>
+                    <a href="http://localhost:3000/d/monitoramento-devops-redes/monitoramento-devops-trabalho-redes?orgId=1&from=now-15m&to=now&timezone=browser&refresh=5s&kiosk=tv" target="_blank">Grafana <span>:3000</span></a>
+                    <a href="https://mail.google.com" target="_blank">Gmail <span>SMTP :587</span></a>
                 </div>
                 <div class="actions">
                     <button type="button" data-simulate="/api/simular/login-falho">Simular login falho</button>
@@ -606,17 +606,6 @@ int main() {
 
         refresh();
         setInterval(refresh, 5000);
-
-        async function checkMailhog() {
-            try {
-                const r = await fetch('/api/mailhog/count',{cache: 'no-store'});
-                const d = await r.json();
-                const badge = document.getElementById('mailhog-badge');
-                if (badge) badge.style.display = d.total > 0 ? 'inline' : 'none';
-            } catch(e) {}
-        }
-        checkMailhog();
-        setInterval(checkMailhog, 5000);
     </script>
 </body>
 </html>
@@ -1027,7 +1016,7 @@ int main() {
                 <a href="/">Monitoramento</a>
                 <a href="http://localhost:3000/d/monitoramento-devops-redes/monitoramento-devops-trabalho-redes?orgId=1&from=now-15m&to=now&timezone=browser&refresh=5s" target="_blank">Grafana <span>:3000</span></a>
                 <a href="http://localhost:9090" target="_blank">Prometheus <span>:9090</span></a>
-                <a href="http://localhost:8025" target="_blank">MailHog <span>:8025</span> <span id="mailhog-badge" style="display:none;background:#e53;color:#fff;border-radius:50%;padding:0 6px;font-size:0.75em;margin-left:4px;">!</span></a>
+                <a href="https://mail.google.com" target="_blank">Gmail <span>SMTP :587</span></a>
             </nav>
         </div>
     </header>
@@ -1096,7 +1085,7 @@ int main() {
                     <div class="metric"><span>Latencia ms</span><strong id="m-latency">--</strong></div>
                     <div class="metric"><span>Vulnerabilidades</span><strong id="m-vuln">--</strong></div>
                 </div>
-                <div class="log" id="status-log">Os alertas aparecem no Prometheus, Grafana e MailHog apos o tempo de avaliacao.</div>
+                <div class="log" id="status-log">Os alertas aparecem no Prometheus, Grafana e na caixa de entrada do Gmail apos o tempo de avaliacao.</div>
             </aside>
         </section>
     </main>
@@ -1338,20 +1327,6 @@ int main() {
 
         crow::response resposta(metrica);
         resposta.add_header("Content-Type", "text/plain; version=0.0.4");
-        return resposta;
-    });
-
-    CROW_ROUTE(app, "/api/mailhog/count")
-    ([](){
-        FILE* pipe = popen("curl -s http://mailhog:8025/api/v2/messages?limit=1", "r");
-        if (!pipe) return crow::response(500, "erro");
-        char buffer[4096];
-        string result = "";
-        while (fgets(buffer, sizeof(buffer), pipe) != NULL) result += buffer;
-        pclose(pipe);
-        crow::response resposta(result);
-        resposta.add_header("Content-Type", "application/json");
-        resposta.add_header("Access-Control-Allow-Origin", "*");
         return resposta;
     });
 

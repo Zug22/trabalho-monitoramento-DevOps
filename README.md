@@ -13,7 +13,7 @@ A stack foi totalmente conteinerizada e opera com Docker Compose:
 * **Blackbox Exporter:** Executa probes HTTP, DNS e SMTP para medir disponibilidade e latência de serviços de rede.
 * **Grafana:** Front-end da equipe de DevOps. Consome dados do Prometheus para exibir painéis em tempo real, com datasource e dashboard provisionados automaticamente.
 * **Alertmanager:** Orquestrador de crises. Avalia estados críticos e despacha notificações.
-* **MailHog:** Servidor SMTP de testes local. Intercepta os e-mails disparados pelo Alertmanager para validação em ambiente de desenvolvimento sem utilizar caixas de entrada reais.
+* **Gmail SMTP:** Canal real de e-mail usado pelo Alertmanager para enviar alertas para a equipe.
 
 ---
 
@@ -33,6 +33,8 @@ sudo apt update
 sudo apt install g++ libboost-all-dev apache2-utils stress -y
 make
 ```
+
+Para envio real de e-mails pelo Gmail, é necessário gerar uma senha de app na conta Google usada como remetente e criar o arquivo local `secrets/gmail_app_password.txt` com essa senha. Esse arquivo fica fora do Git e é montado no Alertmanager como Docker secret.
 
 ---
 
@@ -62,7 +64,7 @@ Com todos os serviços ativos, acesse-os diretamente pelo navegador:
 | Prometheus        | http://localhost:9090 | Consulta bruta de métricas (PromQL) e status dos alertas.    |
 | Alertmanager      | http://localhost:9093 | Gerenciamento de silenciamento e roteamento de alertas.      |
 | Grafana           | http://localhost:3000 | Dashboard provisionado. Credenciais padrão: admin/admin.     |
-| MailHog (Web UI)  | http://localhost:8025 | Caixa de entrada virtual para leitura dos e-mails de alerta. |
+| Gmail SMTP        | smtp.gmail.com:587    | Envio real dos e-mails de alerta pelo Alertmanager.          |
 
 ---
 
@@ -75,9 +77,9 @@ Os documentos de apoio ficam em `docs/`:
 * `playbooks-incidentes.md`: resposta a incidentes e níveis de alerta.
 * `testes-e-video.md`: roteiro de navegação e gravação do vídeo.
 * `relatorio-base.md`: estrutura para transformar em PDF no padrão de artigo/ABNT.
-* `relatorio-overleaf.txt`: apoio textual para o relatório no Overleaf.
-* `RedesSecOps.pdf`: PDF final do trabalho.
 * `checklist-entrega.md`: pendências finais antes de enviar.
+
+O PDF final deve ser compilado fora do repositório, a partir do texto atualizado do relatório, para evitar versionar artefatos binários gerados.
 
 ---
 

@@ -69,20 +69,13 @@ services:
     container_name: alertmanager
     volumes:
       - ./config_alertas.yml:/etc/alertmanager/config_alertas.yml
+    secrets:
+      - gmail_app_password
     command:
       - '--config.file=/etc/alertmanager/config_alertas.yml'
     ports:
       - "9093:9093"
-    depends_on:
-      - mailhog
 
-  mailhog:
-    image: mailhog/mailhog
-    container_name: mailhog
-    ports:
-      - "1025:1025" # Porta que recebe os emails
-      - "8025:8025" # Porta para ler os emails
-  
   grafana:
     image: grafana/grafana-oss:latest
     container_name: grafana
@@ -92,7 +85,7 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_ANONYMUS_ORG_ROLE=Viewer
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
       - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/monitoramento-devops.json
     volumes:
       - grafana-storage:/var/lib/grafana
@@ -105,3 +98,7 @@ volumes:
   grafana-storage:
   postgres-data:
   prometheus-data:
+
+secrets:
+  gmail_app_password:
+    file: ./secrets/gmail_app_password.txt

@@ -1,12 +1,16 @@
 # Runbook
 
+## Preparar Gmail
+
+Antes de subir o ambiente, crie uma senha de app na conta Gmail usada pelo Alertmanager e coloque o valor em `secrets/gmail_app_password.txt`. Esse arquivo e ignorado pelo Git.
+
 ## Subir o Ambiente
 
 ```bash
 docker compose up -d --build
 ```
 
-## Verificar Serviços
+## Verificar Servicos
 
 ```bash
 docker compose ps
@@ -14,14 +18,14 @@ docker compose ps
 
 ## URLs
 
-| Serviço | URL |
+| Servico | URL |
 | --- | --- |
 | Front principal | http://localhost:8080 |
-| Laboratório de ataques | http://localhost:8080/ataques |
+| Laboratorio de ataques | http://localhost:8080/ataques |
 | Prometheus | http://localhost:9090 |
 | Grafana | http://localhost:3000 |
 | Alertmanager | http://localhost:9093 |
-| MailHog | http://localhost:8025 |
+| Gmail | https://mail.google.com |
 
 ## Logs
 
@@ -29,6 +33,7 @@ docker compose ps
 docker compose logs backend
 docker compose logs prometheus
 docker compose logs grafana
+docker compose logs alertmanager
 ```
 
 ## Parar
@@ -36,4 +41,3 @@ docker compose logs grafana
 ```bash
 docker compose down
 ```
-

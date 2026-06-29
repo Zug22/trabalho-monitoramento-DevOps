@@ -1,12 +1,12 @@
-# Relatório Base
+# Relatorio Base
 
-## Título
+## Titulo
 
 Plataforma de Monitoramento para DevOps
 
 ## Resumo
 
-Este projeto implementa uma plataforma de monitoramento de serviços de rede com front-end responsivo, backend C++, banco PostgreSQL, dashboards, alertas por e-mail e laboratório de ataques controlados.
+Este projeto implementa uma plataforma de monitoramento de servicos de rede com front-end responsivo, backend C++, banco PostgreSQL, dashboards, alertas reais por e-mail e laboratorio de ataques controlados.
 
 ## Tecnologias
 
@@ -15,12 +15,11 @@ Este projeto implementa uma plataforma de monitoramento de serviços de rede com
 - Prometheus
 - Grafana
 - Alertmanager
-- MailHog
+- Gmail SMTP
 - PostgreSQL
 - Postgres Exporter
 - Blackbox Exporter
 
 ## Resultados
 
-A solução monitora web server, banco de dados, DNS, SMTP e eventos de segurança, incluindo DDoS local, falhas de autenticação, alteração de configuração e vulnerabilidade conhecida simulada.
-
+A solucao monitora web server, banco de dados, DNS, SMTP do Gmail e eventos de seguranca, incluindo DDoS local, falhas de autenticacao, alteracao de configuracao e vulnerabilidade conhecida simulada.
