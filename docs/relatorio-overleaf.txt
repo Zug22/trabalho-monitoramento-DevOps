@@ -17,6 +17,7 @@
 \usepackage{fancyhdr}
 \usepackage{microtype}
 \usepackage{caption}
+\usepackage{graphicx}
 
 \geometry{
     left=3cm,
@@ -55,6 +56,7 @@
 }
 
 \lstset{style=codigo}
+\graphicspath{{prints/}{../prints/}}
 
 \begin{document}
 
@@ -207,6 +209,13 @@ O Prometheus atua como mecanismo central de coleta e armazenamento de séries te
 \subsection{Grafana}
 O Grafana é responsável pela visualização das métricas. O projeto utiliza provisionamento automático de datasource e dashboard, permitindo que os painéis estejam disponíveis assim que o ambiente é iniciado.
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{dashboard-grafana.jpeg}
+    \caption{Dashboard do Grafana com métricas do web server, banco PostgreSQL, probes de rede e eventos de segurança.}
+    \label{fig:grafana-dashboard}
+\end{figure}
+
 \subsection{Alertmanager e Gmail SMTP}
 O Alertmanager organiza e encaminha alertas. O envio de e-mail foi configurado por meio do servidor \texttt{smtp.gmail.com}, na porta 587, com TLS. Dessa forma, os alertas gerados pelo Prometheus são entregues em uma caixa de entrada real, permitindo validar o fluxo completo de notificação.
 
@@ -242,6 +251,13 @@ A segunda tela é o laboratório de ataques, disponível em \texttt{http://local
 \subsection{Dashboard Principal}
 O dashboard principal apresenta uma visão consolidada dos serviços monitorados. Ele também contém atalhos para Prometheus, Grafana, Gmail e laboratório de ataques. A interface foi construída de forma responsiva, permitindo uso em diferentes tamanhos de tela.
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{front-principal.jpeg}
+    \caption{Tela principal da plataforma com indicadores de disponibilidade, CPU, requisições, erros, latência, conexões, falhas de login e vulnerabilidades.}
+    \label{fig:front-principal}
+\end{figure}
+
 \subsection{Laboratório de Ataques}
 O laboratório de ataques permite executar testes controlados contra a própria aplicação. Os cenários disponíveis são:
 
@@ -253,6 +269,13 @@ O laboratório de ataques permite executar testes controlados contra a própria 
 \end{itemize}
 
 Essa tela também apresenta métricas ao vivo, permitindo observar o efeito das simulações sobre os contadores expostos pelo backend.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{laboratorio-ataques.jpeg}
+    \caption{Laboratório de ataques após a execução de simulações de pico HTTP e falhas de autenticação.}
+    \label{fig:laboratorio-ataques}
+\end{figure}
 
 \section{Banco de Dados}
 
@@ -341,6 +364,13 @@ O fluxo de notificação ocorre da seguinte forma:
     \item O e-mail pode ser visualizado na caixa de entrada do Gmail configurada no projeto.
 \end{enumerate}
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{gmail-alertas.jpeg}
+    \caption{Alertas recebidos no Gmail, incluindo eventos de vulnerabilidade conhecida, alteração de configuração, falhas de autenticação e indisponibilidade SMTP.}
+    \label{fig:gmail-alertas}
+\end{figure}
+
 \section{Execução do Projeto}
 
 Para executar a plataforma completa, utiliza-se o comando:
@@ -348,6 +378,13 @@ Para executar a plataforma completa, utiliza-se o comando:
 \begin{lstlisting}[language=bash]
 docker compose up -d --build
 \end{lstlisting}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{containers-docker.jpeg}
+    \caption{Execução do ambiente com Docker Compose e listagem dos containers ativos.}
+    \label{fig:containers-docker}
+\end{figure}
 
 Após a execução, os serviços ficam disponíveis nos endereços apresentados na Tabela \ref{tab:urls}.
 

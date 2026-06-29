@@ -6,5 +6,6 @@ exportador_test*
 .DS_Store
 *.log
 *.tmp
+*.webm
 docs/*.pdf
 painel_idp.json
